@@ -1,0 +1,160 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+const int MAX = 100;
+
+struct Student {
+    int roll_no;
+    string name;
+    float sgpa;
+};
+
+class StudentDatabase {
+private:
+    Student students[MAX];
+    int n;
+
+public:
+    void inputStudents() {
+        cout << "Enter number of students: ";
+        cin >> n;
+
+        for (int i = 0; i < n; i++) {
+            cout << "\nStudent " << i + 1 << ":\n";
+            cout << "Roll No: ";
+            cin >> students[i].roll_no;
+            cout << "Name: ";
+            cin >> students[i].name;
+            cout << "SGPA: ";
+            cin >> students[i].sgpa;
+        }
+    }
+
+    void displayStudents() {
+        cout << "\nRoll No\tName\tSGPA\n";
+        for (int i = 0; i < n; i++) {
+            cout << students[i].roll_no << "\t" << students[i].name << "\t" << students[i].sgpa << endl;
+        }
+    }
+
+    void bubbleSortByRoll() {
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (students[j].roll_no > students[j + 1].roll_no) {
+                    Student temp = students[j];
+                    students[j] = students[j + 1];
+                    students[j + 1] = temp;
+                }
+            }
+        }
+        cout << "\nSorted by Roll No (Bubble Sort):\n";
+        displayStudents();
+    }
+
+    void insertionSortByName() {
+        for (int i = 1; i < n; i++) {
+            Student key = students[i];
+            int j = i - 1;
+            while (j >= 0 && students[j].name > key.name) {
+                students[j + 1] = students[j];
+                j--;
+            }
+            students[j + 1] = key;
+        }
+        cout << "\nSorted by Name (Insertion Sort):\n";
+        displayStudents();
+    }
+
+    void linearSearchBySGPA(float key) {
+        bool found = false;
+        cout << "\nSearching SGPA = " << key << ":\n";
+        for (int i = 0; i < n; i++) {
+            if (students[i].sgpa == key) {
+                cout << students[i].roll_no << "\t" << students[i].name << "\t" << students[i].sgpa << endl;
+                found = true;
+            }
+        }
+        if (!found) {
+            cout << "No student found with SGPA = " << key << endl;
+        }
+    }
+
+    void binarySearchByName(string key) {
+        int low = 0, high = n - 1;
+        bool found = false;
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            if (students[mid].name == key) {
+                cout << "\nStudent found (Binary Search):\n";
+                cout << students[mid].roll_no << "\t" << students[mid].name << "\t" << students[mid].sgpa << endl;
+                found = true;
+                break;
+            } else if (students[mid].name < key) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        if (!found) {
+            cout << "Student with name '" << key << "' not found.\n";
+        }
+    }
+};
+
+int main() {
+    StudentDatabase db;
+    int choice;
+    bool running = true;
+
+    while (running) {
+        cout << "\n==== Student Database Menu ====\n";
+        cout << "1. Input Students\n";
+        cout << "2. Display Students\n";
+        cout << "3. Sort by Roll No (Bubble Sort)\n";
+        cout << "4. Sort by Name (Insertion Sort)\n";
+        cout << "5. Search by SGPA (Linear Search)\n";
+        cout << "6. Search by Name (Binary Search)\n";
+        cout << "7. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                db.inputStudents();
+                break;
+            case 2:
+                db.displayStudents();
+                break;
+            case 3:
+                db.bubbleSortByRoll();
+                break;
+            case 4:
+                db.insertionSortByName();
+                break;
+            case 5: {
+                float sgpaKey;
+                cout << "Enter SGPA to search: ";
+                cin >> sgpaKey;
+                db.linearSearchBySGPA(sgpaKey);
+                break;
+            }
+            case 6: {
+                cin.ignore(); // clear input buffer before getline
+                string nameKey;
+                cout << "Enter Name to search: ";
+                getline(cin, nameKey);
+                db.binarySearchByName(nameKey);
+                break;
+            }
+            case 7:
+                running = false;
+                cout << "Exiting program. Goodbye!\n";
+                break;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+        }
+    }
+
+    return 0;
+}

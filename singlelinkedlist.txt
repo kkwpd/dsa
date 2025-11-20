@@ -1,0 +1,176 @@
+#include <iostream>
+using namespace std;
+
+struct node {
+    int data;
+    node* next;
+};
+
+class LinkedList {
+    node* head;
+
+public:
+    LinkedList() {
+        head = NULL;
+    }
+
+    void insert_beg(int x) {
+        node* p = new node;
+        p->data = x;
+        p->next = head;
+        head = p;
+    }
+
+    void insert_end(int x) {
+        node* p = new node;
+        p->data = x;
+        p->next = NULL;
+        if (head == NULL) {
+            head = p;
+            return;
+        }
+        node* ptr = head;
+        while (ptr->next != NULL) {
+            ptr = ptr->next;
+        }
+        ptr->next = p;
+    }
+
+    void insert_bet(int x, int y) {
+        node* ptr = head;
+        while (ptr != NULL && ptr->data != y) {
+            ptr = ptr->next;
+        }
+        if (ptr == NULL) {
+            cout << "Value " << y << " not found.\n";
+            return;
+        }
+        node* p = new node;
+        p->data = x;
+        p->next = ptr->next;
+        ptr->next = p;
+    }
+
+    void delete_beg() {
+        if (head == NULL) {
+            cout << "List is empty.\n";
+            return;
+        }
+        node* temp = head;
+        head = head->next;
+        delete temp;
+    }
+
+    void delete_end() {
+        if (head == NULL) {
+            cout << "List is empty.\n";
+            return;
+        }
+        if (head->next == NULL) {
+            delete head;
+            head = NULL;
+            return;
+        }
+        node* ptr = head;
+        while (ptr->next->next != NULL) {
+            ptr = ptr->next;
+        }
+        delete ptr->next;
+        ptr->next = NULL;
+    }
+
+    void delete_bet(int y) {
+        if (head == NULL) {
+            cout << "List is empty.\n";
+            return;
+        }
+        if (head->data == y) {
+            delete_beg();
+            return;
+        }
+        node* ptr = head;
+        while ( ptr->next->data != y) {
+            ptr = ptr->next;
+        }
+        if (ptr->next == NULL) {
+            cout << "Value " << y << " not found.\n";
+            return;
+        }
+        node* temp = ptr->next;
+        ptr->next = temp->next;
+        delete temp;
+    }
+
+    void display() {
+        node* ptr = head;
+        if (ptr == NULL) {
+            cout << "List is empty.\n";
+            return;
+        }
+        while (ptr != NULL) {
+            cout << ptr->data << " ";
+            ptr = ptr->next;
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    LinkedList list;
+    int choice, x, y;
+
+    do {
+        cout << "\n Linked List Menu \n";
+        cout << "1. Insert at Beginning\n";
+        cout << "2. Insert at End\n";
+        cout << "3. Insert in Between\n";
+        cout << "4. Delete at Beginning\n";
+        cout << "5. Delete at End\n";
+        cout << "6. Delete in Between\n";
+        cout << "7. Display List\n";
+        cout << "0. Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter value: ";
+                cin >> x;
+                list.insert_beg(x);
+                break;
+            case 2:
+                cout << "Enter value: ";
+                cin >> x;
+                list.insert_end(x);
+                break;
+            case 3:
+                cout << "Enter value to insert: ";
+                cin >> x;
+                cout << "Enter value after which to insert: ";
+                cin >> y;
+                list.insert_bet(x, y);
+                break;
+            case 4:
+                list.delete_beg();
+                break;
+            case 5:
+                list.delete_end();
+                break;
+            case 6:
+                cout << "Enter value to delete: ";
+                cin >> y;
+                list.delete_bet(y);
+                break;
+            case 7:
+                list.display();
+                break;
+            case 0:
+                cout << "Exiting...\n";
+                break;
+            default:
+                cout << "Invalid choice.\n";
+        }
+    } while (choice != 0);
+
+    return 0;
+}
