@@ -1,0 +1,90 @@
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+};
+
+Node* rear = NULL;
+
+void enqueue(int x) {
+    Node* n = new Node{x, NULL};
+
+    if (!rear) {
+        rear = n;
+        rear->next = rear;
+    }
+    else {
+        n->next = rear->next;
+        rear->next = n;
+        rear = n;
+    }
+}
+
+void dequeue() {
+    if (!rear) {
+        cout << "Queue Empty\n";
+        return;
+    }
+
+    Node* t = rear->next;
+
+    if (rear == t)
+        rear = NULL;
+    else
+        rear->next = t->next;
+
+    cout << "Deleted: " << t->data << endl;
+    delete t;
+}
+
+void display() {
+    if (!rear) {
+        cout << "Queue Empty\n";
+        return;
+    }
+
+    Node* t = rear->next;
+
+    do {
+        cout << t->data << " ";
+        t = t->next;
+    } while (t != rear->next);
+
+    cout << endl;
+}
+
+int main() {
+    int ch, x;
+    do {
+        cout << "\n1.Enqueue\n2.Dequeue\n3.Display\n0.Exit\nChoice: ";
+        cin >> ch;
+
+        switch (ch) {
+            case 1:
+                cout << "Enter value: ";
+                cin >> x;
+                enqueue(x);
+                break;
+
+            case 2:
+                dequeue();
+                break;
+
+            case 3:
+                display();
+                break;
+
+            case 0:
+                cout << "Exit";
+                break;
+
+            default:
+                cout << "Wrong Choice";
+        }
+
+    } while (ch != 0);
+
+    return 0;
+}

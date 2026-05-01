@@ -1,0 +1,80 @@
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node *prev, *next;
+} *head = NULL;
+
+void insertStart(int x) {
+    Node* n = new Node{ x, NULL, head };
+    if (head) head->prev = n;
+    head = n;
+}
+
+void insertEnd(int x) {
+    Node* n = new Node{ x, NULL, NULL };
+    if (!head) head = n;
+    else {
+        Node* t = head;
+        while (t->next) t = t->next;
+        t->next = n;
+        n->prev = t;
+    }
+}
+
+void insertAt(int x, int pos) {
+    if (pos == 0) insertStart(x);
+    else {
+        Node* t = head;
+        for (int i = 0; i < pos - 1 && t; i++) t = t->next;
+        if (t) {
+            Node* n = new Node{ x, t, t->next };
+            if (t->next) t->next->prev = n;
+            t->next = n;
+        }
+    }
+}
+
+void deleteStart() {
+    if (!head) return;
+    Node* t = head;
+    head = head->next;
+    if (head) head->prev = NULL;
+    delete t;
+}
+
+void deleteEnd() {
+    if (!head) return;
+    Node* t = head;
+    while (t->next) t = t->next;
+    if (t->prev) t->prev->next = NULL;
+    else head = NULL;
+    delete t;
+}
+
+void deleteAt(int pos) {
+    if (pos == 0) deleteStart();
+    else {
+        Node* t = head;
+        for (int i = 0; i < pos && t; i++) t = t->next;
+        if (t) {
+            if (t->prev) t->prev->next = t->next;
+            if (t->next) t->next->prev = t->prev;
+            delete t;
+        }
+    }
+}
+
+void display() {
+    for (Node* t = head; t; t = t->next)
+        cout << t->data << " ";
+    cout << endl;
+}
+
+int main() {
+    insertStart(5); insertEnd(15); insertAt(10, 1);
+    display(); // 5 10 15
+    deleteAt(1); deleteStart(); deleteEnd();
+    display(); 
+}
