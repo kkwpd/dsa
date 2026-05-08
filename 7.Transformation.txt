@@ -1,0 +1,339 @@
+Scaling
+-
+#include<windows.h>
+#include <GL/glut.h>
+#include <iostream>
+using namespace std;
+
+int n;
+float x[20], y[20];
+float result[2][20];
+float input[2][20];
+float T[2][2];
+
+float Sx, Sy;
+
+void scale() {
+    for(int i = 0; i < n; i++) {
+        input[0][i] = x[i];
+        input[1][i] = y[i];
+    }
+
+    T[0][0] = Sx; T[0][1] = 0;
+    T[1][0] = 0;  T[1][1] = Sy;
+
+    for(int i = 0; i < 2; i++) {
+        for(int j = 0; j < n; j++) {
+            result[i][j] = 0;
+        }
+    }
+
+    for(int i = 0; i < 2; i++) {
+        for(int j = 0; j < n; j++) {
+            for(int k = 0; k < 2; k++) {
+                result[i][j] += T[i][k] * input[k][j];
+            }
+        }
+    }
+}
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glColor3f(0,1,0);
+    glBegin(GL_LINES);
+    glVertex2f(-100,0); 
+    glVertex2f(100,0);
+    glVertex2f(0,-100); 
+    glVertex2f(0,100);
+    glEnd();
+
+    glColor3f(1,1,1);
+    glBegin(GL_LINE_LOOP);
+    for(int i = 0; i < n; i++) {
+        glVertex2f(x[i], y[i]);
+    }
+    glEnd();
+
+    glColor3f(1,0,0);
+    glBegin(GL_LINE_LOOP);
+    for(int i = 0; i < n; i++) {
+        glVertex2f(result[0][i], result[1][i]);
+    }
+    glEnd();
+
+    glFlush();
+}
+
+void init() {
+    glClearColor(0,0,0,1);
+    glViewport(0, 0, 600, 600);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(-100,100,-100,100);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+int main(int argc, char** argv) {
+    cout << "Enter number of vertices: ";
+    cin >> n;
+
+    cout << "Enter coordinates:\n";
+    for(int i = 0; i < n; i++) {
+        cin >> x[i] >> y[i];
+    }
+
+    cout << "Enter scaling factors (Sx Sy): ";
+    cin >> Sx >> Sy;
+
+    scale();
+
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(600,600);
+    glutCreateWindow("Scaling using Matrix (Loops)");
+
+    init();
+    glutDisplayFunc(display);
+    glutPostRedisplay();
+    glutMainLoop();
+    return 0;
+}
+
+Rotation-
+#include <windows.h>
+#include <GL/glut.h>
+#include <iostream>
+#include <math.h>
+using namespace std;
+
+int n;
+float x[20], y[20];
+
+float input[3][20];
+float result[3][20];
+float T[3][3];
+
+float xr, yr, theta;
+
+void rotate() {
+
+    float rad = theta * 3.1416 / 180.0;
+    float c = cos(rad);
+    float s = sin(rad);
+
+
+    T[0][0] = c;   T[0][1] = -s;  T[0][2] = xr - xr*c + yr*s;
+    T[1][0] = s;   T[1][1] =  c;  T[1][2] = yr - xr*s - yr*c;
+    T[2][0] = 0;   T[2][1] = 0;   T[2][2] = 1;
+
+
+    for(int i = 0; i < n; i++) {
+        input[0][i] = x[i];
+        input[1][i] = y[i];
+        input[2][i] = 1;
+    }
+
+
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < n; j++) {
+            result[i][j] = 0;
+        }
+    }
+
+
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < n; j++) {
+            for(int k = 0; k < 3; k++) {
+                result[i][j] += T[i][k] * input[k][j];
+            }
+        }
+    }
+}
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+
+
+    glColor3f(0,1,0);
+    glBegin(GL_LINES);
+    glVertex2f(-100,0); glVertex2f(100,0);
+    glVertex2f(0,-100); glVertex2f(0,100);
+    glEnd();
+
+
+    glColor3f(1,1,0);
+    glPointSize(5);
+    glBegin(GL_POINTS);
+    glVertex2f(xr, yr);
+    glEnd();
+
+    glColor3f(1,1,1);
+    glBegin(GL_LINE_LOOP);
+    for(int i = 0; i < n; i++) {
+        glVertex2f(x[i], y[i]);
+    }
+    glEnd();
+
+
+    glColor3f(1,0,0);
+    glBegin(GL_LINE_LOOP);
+    for(int i = 0; i < n; i++) {
+        glVertex2f(result[0][i], result[1][i]);
+    }
+    glEnd();
+
+    glFlush();
+}
+
+void init() {
+    glClearColor(0,0,0,1);
+    gluOrtho2D(-100,100,-100,100);
+}
+
+int main(int argc, char** argv) {
+
+    cout << "Enter number of vertices: ";
+    cin >> n;
+
+    cout << "Enter coordinates:\n";
+    for(int i = 0; i < n; i++) {
+        cin >> x[i] >> y[i];
+    }
+
+    cout << "Enter rotation angle (in degrees): ";
+    cin >> theta;
+
+    cout << "Enter arbitrary point (xr yr): ";
+    cin >> xr >> yr;
+
+    rotate();
+
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(600,600);
+    glutCreateWindow("Rotation using Matrix (Loops)");
+
+    init();
+    glutDisplayFunc(display);
+
+    glutMainLoop();
+    return 0;
+}
+
+Reflection-
+#include<windows.h>
+#include <GL/glut.h>
+#include <iostream>
+using namespace std;
+
+int n, choice;
+float x[20], y[20];
+
+
+float input[2][20];
+float result[2][20];
+float T[2][2];
+
+void reflect() {
+
+
+    for(int i = 0; i < n; i++) {
+        input[0][i] = x[i];
+        input[1][i] = y[i];
+    }
+
+
+    if(choice == 1) {
+        T[0][0] = 1;  T[0][1] = 0;
+        T[1][0] = 0;  T[1][1] = -1;
+    }
+    else if(choice == 2) {
+        T[0][0] = -1; T[0][1] = 0;
+        T[1][0] = 0;  T[1][1] = 1;
+    }
+
+
+    for(int i = 0; i < 2; i++) {
+        for(int j = 0; j < n; j++) {
+            result[i][j] = 0;
+        }
+    }
+
+
+    for(int i = 0; i < 2; i++) {
+        for(int j = 0; j < n; j++) {
+            for(int k = 0; k < 2; k++) {
+                result[i][j] += T[i][k] * input[k][j];
+            }
+        }
+    }
+}
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+
+
+    glColor3f(0.0, 1.0, 0.0);
+    glBegin(GL_LINES);
+
+    glVertex2f(-100, 0);
+    glVertex2f(100, 0);
+
+    glVertex2f(0, -100);
+    glVertex2f(0, 100);
+
+    glEnd();
+
+
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_LINE_LOOP);
+    for(int i = 0; i < n; i++) {
+        glVertex2f(x[i], y[i]);
+    }
+    glEnd();
+
+
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_LINE_LOOP);
+    for(int i = 0; i < n; i++) {
+        glVertex2f(result[0][i], result[1][i]);
+    }
+    glEnd();
+
+    glFlush();
+}
+
+void init() {
+    glClearColor(0, 0, 0, 1);
+    gluOrtho2D(-100, 100, -100, 100);
+}
+
+int main(int argc, char** argv) {
+
+    cout << "Enter number of vertices: ";
+    cin >> n;
+
+    cout << "Enter coordinates (x y):\n";
+    for(int i = 0; i < n; i++) {
+        cin >> x[i] >> y[i];
+    }
+
+    cout << "\n1. Reflection about X-axis";
+    cout << "\n2. Reflection about Y-axis";
+    cout << "\nEnter choice: ";
+    cin >> choice;
+
+    reflect();
+
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(600, 600);
+    glutCreateWindow("Reflection using Matrix (Loops)");
+
+    init();
+    glutDisplayFunc(display);
+
+    glutMainLoop();
+    return 0;
+}
