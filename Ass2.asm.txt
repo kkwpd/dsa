@@ -1,0 +1,99 @@
+prompt macro msg
+lea dx,msg
+mov ah,09h
+int 21h
+endm
+
+data segment
+msg0 db 10,13," $"
+msg1 db 10,13,"Hello World !$"
+msg2 db 10,13,"Enter a Number : $"
+msg3 db 10,13,"Highest Number : $"
+no db 05h dup(0)
+a db 05h
+b db 04h
+data ends
+
+code segment
+assume cs:code,ds:data
+start:
+mov ax,data
+mov ds,ax
+prompt msg1
+
+prompt msg0
+mov si,00h
+up1:
+prompt msg2
+call take
+mov [no+si],bl
+inc si
+dec [a]
+jnz up1
+
+prompt msg0
+mov si,00h
+mov bl,[no+si]
+up2:
+inc si
+mov al,[no+si]
+cmp bl,al
+jnc down5
+mov bl,al
+down5:
+dec [b]
+jnz up2
+prompt msg3
+call display
+
+mov ah,4ch
+int 21h
+
+take proc near
+mov ah,01h
+int 21h
+cmp al,39h
+jbe down1
+sub al,07h
+down1: sub al,30h
+mov cl,04h
+rol al,cl
+mov bl,al
+
+mov ah,01h
+int 21h
+cmp al,39h
+jbe down2
+sub al,07h
+down2: sub al,30h
+add bl,al
+ret
+take endp
+
+display proc near
+mov ch,bl
+and bl,0f0h
+mov cl,04h
+rol bl,cl
+cmp bl,09h
+jbe down3
+add bl,07h
+down3: add bl,30h
+mov dl,bl
+mov ah,02h
+int 21h
+
+mov bl,ch
+and bl,0fh
+cmp bl,09h
+jbe down4
+add bl,07h
+down4: add bl,30h
+mov dl,bl
+mov ah,02h
+int 21h
+ret
+display endp
+
+code ends
+end start

@@ -1,0 +1,195 @@
+prompt macro msg
+lea dx,msg
+mov ah,09h
+int 21h
+endm
+
+data segment
+msg0 db 10,13," $"
+msg1 db 10,13,"Hello World !$"
+msg2 db 10,13,"Enter a 4-digit HEX : $"
+msg3 db 10,13,"Converted BCD : $"
+msg4 db 10,13,"Enter a 5-digit BCD : $"
+msg5 db 10,13,"Converted HEX : $"
+msg6 db 10,13,"-----Menu-----"
+db 10,13,"1. HEX -> BCD."
+db 10,13,"2. BCD -> HEX."
+db 10,13,"3. EXIT."
+db 10,13,"Enter your Choice : $"
+no db 05h dup(0)
+resh dw 05h dup(0)
+resl dw 05h dup(0)
+data ends
+
+code segment
+assume cs:code,ds:data
+start:
+mov ax,data
+mov ds,ax
+prompt msg1
+prompt msg0
+
+Menu:
+prompt msg6
+mov ah,01h
+int 21h
+
+cmp al,31h
+je m1
+cmp al,32h
+je m2
+cmp al,33h
+je ex
+
+
+m1: call htb
+jmp menu
+
+m2: call bth
+jmp menu
+
+ex: mov ah,4ch
+int 21h
+
+htb proc near
+prompt msg0
+prompt msg2
+call take
+mov bh,bl
+call take
+mov si,00h
+mov cl,00h
+mov dx,00h
+mov ax,bx
+mov bx,0Ah
+up1:
+div bx
+mov [no+si],dl
+mov dx,00h
+inc si
+inc cl
+cmp ax,0001h
+jnc up1
+prompt msg3
+dec si
+up2:
+mov bl,[no+si]
+cmp bl,09h
+jbe down5
+add bl,07h
+down5: add bl,30h
+mov dl,bl
+mov ah,02h
+int 21h
+dec si
+dec cl
+jnz up2
+prompt msg0
+ret
+htb endp
+
+bth proc near
+prompt msg0
+prompt msg4
+mov ah,01h
+int 21h
+mov ah,00h
+sub al,30h
+mov bx,2710h
+mul bx
+mov [resh],dx
+mov [resl],ax
+
+mov ah,01h
+int 21h
+mov ah,00h
+sub al,30h
+mov bx,03E8h
+mul bx
+add [resh],dx
+add [resl],ax
+
+mov ah,01h
+int 21h
+mov ah,00h
+sub al,30h
+mov bx,0064h
+mul bx
+add [resh],dx
+add [resl],ax
+
+mov ah,01h
+int 21h
+mov ah,00h
+sub al,30h
+mov bx,000Ah
+mul bx
+add [resh],dx
+add [resl],ax
+
+mov ah,01h
+int 21h
+sub al,30h
+mov ah,00h
+add [resl],ax
+
+prompt msg5
+mov bx,[resh]
+call display
+mov bx,[resl]
+mov bl,bh
+call display
+mov bx,[resl]
+call display
+prompt msg0
+ret
+bth endp
+
+take proc near
+mov ah,01h
+int 21h
+cmp al,39h
+jbe down1
+sub al,07h
+down1: sub al,30h
+mov cl,04h
+rol al,cl
+mov bl,al
+
+mov ah,01h
+int 21h
+cmp al,39h
+jbe down2
+sub al,07h
+down2: sub al,30h
+add bl,al
+ret
+take endp
+
+display proc near
+mov ch,bl
+and bl,0f0h
+mov cl,04h
+rol bl,cl
+cmp bl,09h
+jbe down3
+add bl,07h
+down3: add bl,30h
+mov dl,bl
+mov ah,02h
+int 21h
+
+mov bl,ch
+and bl,0fh
+cmp bl,09h
+jbe down4
+add bl,07h
+down4: add bl,30h
+mov dl,bl
+mov ah,02h
+int 21h
+ret
+display endp
+
+code ends
+end start

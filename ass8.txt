@@ -1,0 +1,110 @@
+prompt macro msg
+lea dx,msg
+mov ah,09h
+int 21h
+endm
+
+data segment public
+msg1 db 10,13," $"
+msg2 db 10,13,"Enter a String : $"
+msg3 db 10,13,"Concatenated Strings : $"
+public s1,s2
+s1 db 25 dup("$")
+s2 db 25 dup("$")
+data ends
+
+extrn concat:far
+extrn compar:far
+
+code segment public
+assume ds:data,cs:code
+start:
+mov ax,data
+mov ds,ax
+mov es,ax
+
+prompt msg2
+lea dx,s1
+mov ah,0Ah
+int 21h
+prompt msg2
+lea dx,s2
+mov ah,0Ah
+int 21h
+prompt msg1
+prompt msg3
+call concat
+call compar
+prompt msg1
+mov ah,4ch
+int 21h
+
+code ends
+end start
+
+prompt macro msg
+lea dx,msg
+mov ah,09h
+int 21h
+endm
+
+data segment public
+msg5 db 10,13,"Strings Are Equal.$"
+msg4 db 10,13,"Strings Are Not Equal.$"
+full db 25 dup("$")
+data ends
+
+extrn s1:byte
+extrn s2:byte
+
+code segment public
+assume ds:data,cs:code
+start:
+mov ax,data
+mov ds,ax
+
+mov ah,4ch
+int 21h
+
+public concat,compar
+concat proc far
+mov dl,[s1+1]
+mov si,02h
+mov di,00h
+up1:
+mov al,[s1+si]
+mov [full+di],al
+inc si
+inc di
+dec dl
+jnz up1
+mov dl,[s2+1]
+mov si,02h
+up2:
+mov al,[s2+si]
+mov [full+di],al
+inc si
+inc di
+dec dl
+jnz up2
+prompt full
+ret
+concat endp
+
+compar proc far
+mov bl,[s1+1]
+mov cl,[s2+1]
+lea si,[s1+2]
+lea di,[s2+2]
+cmp bl,cl
+jnz d1
+repz cmpsb
+jnz d1
+prompt msg5
+jmp d2
+d1: prompt msg4
+d2: ret
+compar endp
+
+code ends
+end start

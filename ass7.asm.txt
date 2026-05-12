@@ -1,0 +1,63 @@
+prompt macro msg
+lea dx,msg
+mov ah,09h
+int 21h
+endm
+
+data segment
+msg1 db 10,13," $"
+msg2 db 10,13,"Enter a String : $"
+msg3 db 10,13,"Length of the String : $"
+msg4 db 10,13,"Reverse of the String : $"
+str db 25 dup("$")
+rev db 25 dup("$")
+data ends
+
+code segment
+assume ds:data,cs:code
+start:
+mov ax,data
+mov ds,ax
+
+prompt msg2
+lea dx,str
+mov ah,0Ah
+int 21h
+prompt msg1
+call los
+call ros
+prompt msg1
+mov ah,4ch
+int 21h
+
+los proc near
+prompt msg3
+mov dl,[str+1]
+cmp dl,09h
+jbe add30
+add dl,07h
+add30: add dl,30h
+mov ah,02h
+int 21h
+ret
+los endp
+
+ros proc near
+prompt msg4
+mov di,00h
+mov cl,[str+1]
+mov ch,00h
+mov si,02h
+add si,cx
+up1: dec si
+mov dl,[str+si]
+mov [rev+di],dl
+inc di
+dec cx
+jnz up1
+prompt rev
+ret
+ros endp
+
+code ends
+end start
